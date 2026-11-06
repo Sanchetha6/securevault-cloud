@@ -37,6 +37,3 @@ locals {
     contains(flatten([try(s.Resource, [])]), "*")
   ]
 }
-
-check "no_wildcard_action_and_resource" {
-}
