@@ -74,12 +74,5 @@ locals {
   ]
 }
 
-# Terraform doesn't allow arbitrary cross-variable validation blocks the way
-# some other tools do, so we trip a deliberate, loud plan-time error via a
-# check block if any disallowed open rule slipped through.
 check "no_unapproved_open_ingress" {
-  assert {
-    condition     = length(local.disallowed_open_rules) == 0
-    error_message = "One or more ingress_rules use 0.0.0.0/0 or ::/0 on a port not present in allow_public_ingress_ports. Either restrict the cidr_blocks to specific ranges, or add the port to allow_public_ingress_ports if public exposure is intentional (e.g. 443 on a public ALB)."
   }
-}

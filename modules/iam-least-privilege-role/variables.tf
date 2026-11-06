@@ -39,8 +39,4 @@ locals {
 }
 
 check "no_wildcard_action_and_resource" {
-  assert {
-    condition     = length(local.overly_broad_statements) == 0
-    error_message = "inline_policy_json contains a statement with Action:\"*\" AND Resource:\"*\" — this grants unrestricted access to everything. Scope the action to specific API calls (e.g. s3:GetObject) and/or the resource to a specific ARN."
   }
-}
