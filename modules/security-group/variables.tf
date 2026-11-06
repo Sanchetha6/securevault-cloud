@@ -74,4 +74,5 @@ locals {
   ]
 }
 
-
+# Enforcement lives in main.tf as a lifecycle precondition on aws_security_group.this
+# (a hard error). A `check` block was removed because it only ever warned.
