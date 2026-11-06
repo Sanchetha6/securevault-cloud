@@ -39,4 +39,4 @@ locals {
 }
 
 check "no_wildcard_action_and_resource" {
-  }
+}

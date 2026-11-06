@@ -75,4 +75,4 @@ locals {
 }
 
 check "no_unapproved_open_ingress" {
-  }
+}
