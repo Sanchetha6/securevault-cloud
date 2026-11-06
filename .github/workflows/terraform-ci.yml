@@ -1,0 +1,69 @@
+name: terraform-ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  validate:
+    name: Format and validate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.9.8
+
+      - name: terraform fmt (style check)
+        run: terraform fmt -check -recursive
+
+      - name: terraform validate (every module and the example)
+        run: |
+          set -e
+          for d in modules/*/ examples/basic-usage; do
+            echo "::group::validate $d"
+            (cd "$d" && terraform init -backend=false -input=false && terraform validate)
+            echo "::endgroup::"
+          done
+
+  tflint:
+    name: tflint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: terraform-linters/setup-tflint@v4
+
+      - name: Init tflint plugins
+        run: tflint --init
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+
+      - name: Run tflint on every folder
+        run: tflint --recursive
+
+  tfsec:
+    name: tfsec security scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Blocking: fails the build on CRITICAL findings inside the modules.
+      - name: tfsec (blocking, CRITICAL only)
+        uses: aquasecurity/tfsec-action@v1.0.3
+        with:
+          working_directory: modules
+          additional_args: --minimum-severity CRITICAL
+
+      # Informational: shows every finding but never fails the build.
+      - name: tfsec (full report, informational)
+        uses: aquasecurity/tfsec-action@v1.0.3
+        with:
+          working_directory: modules
+          soft_fail: true
